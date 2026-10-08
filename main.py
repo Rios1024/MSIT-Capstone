@@ -9,15 +9,27 @@ import random
 app.stepsPerSecond = 10
 app.isGameOver = False
 
+# DDA tuning constants (named so the rules and the unit tests share one source)
+MIN_TIER = 1
+MAX_TIER = 3
+FAST_SECONDS = 5.0       # Faster than this with no errors = flow state
+SLOW_SECONDS = 15.0      # Slower than this = cognitive overload
+STREAK_TO_PROMOTE = 3    # Every 3rd consecutive first-try answer promotes
+MISSES_TO_DEMOTE = 2     # 2 consecutive first-try misses demote
+SESSION_SECONDS = 180    # 3-minute session
+
 # Session Tracking (3-Minute Limit)
 app.globalTimeTicks = 0
-app.sessionLimitTicks = 1800 # 3 minutes * 60 seconds * 10 ticks/sec
+app.sessionLimitTicks = SESSION_SECONDS * app.stepsPerSecond
 
 # Performance & DDA State
 app.difficulty = 1
 app.timeTicks = 0
 app.errors = 0
-app.currentStreak = 0        # Tracks consecutive correct first-try answers
+app.currentStreak = 0        # Consecutive correct first-try answers
+app.missStreak = 0           # Consecutive questions missed on the first try
+app.lastTerm = None          # Last term shown, so it is not repeated back-to-back
+app.lastReason = 'steady'    # Why the DDA engine made its last decision
 app.totalQuestions = 0       # Total questions answered
 app.firstTryCorrect = 0      # Accuracy tracking
 app.highestTier = 1          # Peak difficulty reached
@@ -73,7 +85,7 @@ tierLabel = Label("Tier: 1", 70, 90, size=14, bold=True)
 timeLabel = Label("Time: 0.0s", 200, 90, size=14)
 errorLabel = Label("Errors: 0", 330, 90, size=14, fill='red')
 streakLabel = Label("Streak: 0", 200, 110, size=12, fill='orange', bold=True)
-globalTimerLabel = Label("Session Time: 180s", 200, 380, size=14, bold=True)
+globalTimerLabel = Label(f"Session Time Left: {SESSION_SECONDS}s", 200, 380, size=14, bold=True)
 
 topicLabel = Label("", 200, 140, size=18, bold=True, fill='midnightBlue')
 termLabel = Label("", 200, 175, size=22, bold=True, fill='crimson')
@@ -95,96 +107,142 @@ app.reportUI = Group(app.reportBg, app.reportTitle, app.reportTotal, app.reportA
 app.reportUI.visible = False
 
 # ==============================================================================
-# 4. ENGINE LOGIC & DDA ALGORITHM
+# 4. PURE DDA LOGIC (no graphics calls, so each rule can be unit tested)
+# ==============================================================================
+def updateStreaks(streak, missStreak, errors):
+    """Run once per completed question. Returns (streak, missStreak).
+    A first-try answer extends the streak; a corrected answer counts as a miss."""
+    if errors == 0:
+        return streak + 1, 0
+    return 0, missStreak + 1
+
+def nextDifficulty(tier, streak, missStreak, seconds, errors):
+    """Decide the next tier. Returns (newTier, reason).
+    Overload is checked first so a slow or missed answer can never promote."""
+    # Rule 1: Cognitive Overload Mitigation
+    if seconds > SLOW_SECONDS or errors >= 2 or missStreak >= MISSES_TO_DEMOTE:
+        return max(MIN_TIER, tier - 1), 'overload'
+
+    # Rule 2: Promotion on every 3rd consecutive first-try answer
+    if streak > 0 and streak % STREAK_TO_PROMOTE == 0:
+        return min(MAX_TIER, tier + 1), 'streak'
+
+    # Rule 3: Flow State Recognition
+    if errors == 0 and seconds < FAST_SECONDS:
+        return min(MAX_TIER, tier + 1), 'flow'
+
+    # Rule 4: Optimal challenge, hold the tier
+    return tier, 'steady'
+
+def pickPuzzle(pool, lastTerm):
+    """Random puzzle from the tier pool, never the term that was just shown."""
+    choices = [p for p in pool if p["term"] != lastTerm]
+    if len(choices) == 0:    # A one-item pool has no alternative
+        choices = pool
+    return random.choice(choices)
+
+def calcAccuracy(firstTryCorrect, totalQuestions):
+    """First-try accuracy as a whole percent; 0 when nothing was answered."""
+    if totalQuestions == 0:
+        return 0
+    return int(firstTryCorrect * 100 / totalQuestions)
+
+def secondsRemaining(globalTicks, stepsPerSecond):
+    """Whole seconds left in the session, never below zero."""
+    return max(0, SESSION_SECONDS - globalTicks // stepsPerSecond)
+
+def streakText(streak):
+    """Streak label text; the flame appears from a 3-answer streak onward."""
+    if streak >= STREAK_TO_PROMOTE:
+        return f"Streak: {streak} \U0001F525"
+    return f"Streak: {streak}"
+
+# ==============================================================================
+# 5. ENGINE STATE & UI UPDATES
 # ==============================================================================
 def loadScenario():
     app.timeTicks = 0
     app.errors = 0
-    puzzle = random.choice(app.curriculum[app.difficulty])
-    
+    puzzle = pickPuzzle(app.curriculum[app.difficulty], app.lastTerm)
+    app.lastTerm = puzzle["term"]
+
     tierLabel.value = f"Tier: {app.difficulty}"
     topicLabel.value = app.topics[app.difficulty]
     termLabel.value = f"Term: {puzzle['term']}"
     promptLabel.value = puzzle["prompt"]
-    
+
     errorLabel.value = "Errors: 0"
-    streakLabel.value = f"Streak: {app.currentStreak} \uD83D\uDD25" if app.currentStreak >= 3 else f"Streak: {app.currentStreak}"
-    
+    streakLabel.value = streakText(app.currentStreak)
+
     app.correctKey = puzzle["ans"]
     app.currentCorrection = puzzle["correction"]
-    feedbackLabel.value = "" 
+    feedbackLabel.value = ""
 
 def applyDDA():
     time_taken = app.timeTicks / app.stepsPerSecond
-    
-    # DDA Feature 1: Rapid Promotion via Streak Multiplier
-    if app.currentStreak >= 3:
-        app.difficulty = min(3, app.difficulty + 1)
-        app.currentStreak = 0 # Reset streak upon promotion to prevent runaway scaling
-        
-    # DDA Feature 2: Flow State Recognition
-    elif time_taken < 5.0 and app.errors == 0:
-        app.difficulty = min(3, app.difficulty + 1)
-        
-    # DDA Feature 3: Cognitive Overload Mitigation
-    elif time_taken > 15.0 or app.errors >= 2:
-        app.difficulty = max(1, app.difficulty - 1)
-        
+
+    app.currentStreak, app.missStreak = updateStreaks(app.currentStreak, app.missStreak, app.errors)
+    app.difficulty, app.lastReason = nextDifficulty(
+        app.difficulty, app.currentStreak, app.missStreak, time_taken, app.errors)
+
+    # An overload decision starts the student fresh at the easier tier
+    if app.lastReason == 'overload':
+        app.currentStreak = 0
+        app.missStreak = 0
+
     # Track highest tier for the final report
     if app.difficulty > app.highestTier:
         app.highestTier = app.difficulty
-        
+
     loadScenario()
 
 def triggerReport():
     app.isGameOver = True
     app.gameUI.visible = False
-    
+
     # Calculate statistics
     app.reportTotal.value = f"Questions Answered: {app.totalQuestions}"
-    accuracy = int((app.firstTryCorrect / max(1, app.totalQuestions)) * 100)
+    accuracy = calcAccuracy(app.firstTryCorrect, app.totalQuestions)
     app.reportAcc.value = f"First-Try Accuracy: {accuracy}%"
     app.reportPeak.value = f"Highest Tier Reached: {app.highestTier}"
-    
+
     app.reportUI.visible = True
 
 # ==============================================================================
-# 5. EVENT LISTENERS
+# 6. EVENT LISTENERS
 # ==============================================================================
 def onStep():
     if app.isGameOver:
         return
-        
+
     app.timeTicks += 1
     app.globalTimeTicks += 1
-    
+
     timeLabel.value = f"Time: {app.timeTicks / app.stepsPerSecond}s"
-    
+
     # Update global countdown
-    seconds_remaining = max(0, 180 - (app.globalTimeTicks // 10))
+    seconds_remaining = secondsRemaining(app.globalTimeTicks, app.stepsPerSecond)
     globalTimerLabel.value = f"Session Time Left: {seconds_remaining}s"
-    
+
     if app.globalTimeTicks >= app.sessionLimitTicks:
         triggerReport()
 
 def onKeyPress(key):
+    # Only 'y' and 'n' are accepted; every other key is ignored
     if app.isGameOver or key not in ['y', 'n']:
         return
-        
+
     if key == app.correctKey:
         if app.errors == 0:
             app.firstTryCorrect += 1
-            app.currentStreak += 1
-        else:
-            app.currentStreak = 0 
-            
+
         app.totalQuestions += 1
-        applyDDA() 
+        applyDDA()    # Streaks and the tier are updated inside the DDA engine
     else:
         app.errors += 1
         app.currentStreak = 0 # Break streak on error
         errorLabel.value = f"Errors: {app.errors}"
-        streakLabel.value = f"Streak: {app.currentStreak}"
+        streakLabel.value = streakText(app.currentStreak)
         feedbackLabel.value = app.currentCorrection
 
 loadScenario()
