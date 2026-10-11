@@ -1,0 +1,10 @@
+$ python tests/coverage_report.py
+........................................................................ [ 90%]
+........                                                                 [100%]
+80 passed in 2.57s
+
+main.py line coverage (Python trace module)
+  executable lines: 184
+  executed by tests: 184
+  missed lines: none
+  coverage         : 100.0%

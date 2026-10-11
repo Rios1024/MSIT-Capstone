@@ -1,0 +1,34 @@
+$ pytest -v --no-header tests/test_usability.py          (new tests, run against release v0.3.0)
+============================= test session starts ==============================
+collecting ... collected 19 items
+tests/test_usability.py::test_long_prompt_is_shown_in_full_on_two_lines[return] FAILED [  5%]
+tests/test_usability.py::test_long_prompt_is_shown_in_full_on_two_lines[while-loop] FAILED [ 10%]
+tests/test_usability.py::test_long_prompt_is_shown_in_full_on_two_lines[if-elif-else] FAILED [ 15%]
+tests/test_usability.py::test_long_prompt_is_shown_in_full_on_two_lines[conditional] FAILED [ 21%]
+tests/test_usability.py::test_short_prompt_stays_on_one_line PASSED      [ 26%]
+tests/test_usability.py::test_every_prompt_line_fits_the_canvas_width FAILED [ 31%]
+tests/test_usability.py::test_label_text_meets_wcag_contrast[tierLabel] PASSED [ 36%]
+tests/test_usability.py::test_label_text_meets_wcag_contrast[timeLabel] PASSED [ 42%]
+tests/test_usability.py::test_label_text_meets_wcag_contrast[errorLabel] FAILED [ 47%]
+tests/test_usability.py::test_label_text_meets_wcag_contrast[streakLabel] FAILED [ 52%]
+tests/test_usability.py::test_label_text_meets_wcag_contrast[topicLabel] PASSED [ 57%]
+tests/test_usability.py::test_label_text_meets_wcag_contrast[promptLabel] PASSED [ 63%]
+tests/test_usability.py::test_label_text_meets_wcag_contrast[feedbackLabel] PASSED [ 68%]
+tests/test_usability.py::test_label_text_meets_wcag_contrast[instrLabel] PASSED [ 73%]
+tests/test_usability.py::test_label_text_meets_wcag_contrast[globalTimerLabel] PASSED [ 78%]
+tests/test_usability.py::test_header_title_meets_wcag_contrast FAILED    [ 84%]
+tests/test_usability.py::test_streak_of_three_shows_a_marker_the_canvas_can_draw FAILED [ 89%]
+tests/test_usability.py::test_streak_marker_disappears_when_the_streak_breaks FAILED [ 94%]
+tests/test_usability.py::test_capital_letters_are_accepted_as_answers FAILED [100%]
+FAILED tests/test_usability.py::test_long_prompt_is_shown_in_full_on_two_lines[return]
+FAILED tests/test_usability.py::test_long_prompt_is_shown_in_full_on_two_lines[while-loop]
+FAILED tests/test_usability.py::test_long_prompt_is_shown_in_full_on_two_lines[if-elif-else]
+FAILED tests/test_usability.py::test_long_prompt_is_shown_in_full_on_two_lines[conditional]
+FAILED tests/test_usability.py::test_every_prompt_line_fits_the_canvas_width
+FAILED tests/test_usability.py::test_label_text_meets_wcag_contrast[errorLabel]
+FAILED tests/test_usability.py::test_label_text_meets_wcag_contrast[streakLabel]
+FAILED tests/test_usability.py::test_header_title_meets_wcag_contrast - Asser...
+FAILED tests/test_usability.py::test_streak_of_three_shows_a_marker_the_canvas_can_draw
+FAILED tests/test_usability.py::test_streak_marker_disappears_when_the_streak_breaks
+FAILED tests/test_usability.py::test_capital_letters_are_accepted_as_answers
+========================= 11 failed, 8 passed in 0.17s =========================

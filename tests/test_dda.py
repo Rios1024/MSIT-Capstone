@@ -77,11 +77,26 @@ def test_pick_puzzle_single_item_pool(game):
     assert game.pickPuzzle(pool, "only") == {"term": "only"}
 
 
-def test_streak_text_flame_is_valid_unicode(game):
+def test_streak_text_is_plain_text(game):
     assert game.streakText(2) == "Streak: 2"
-    text = game.streakText(3)
-    assert text.endswith("\U0001F525")
-    text.encode("utf-8")    # a lone surrogate would raise here
+    assert game.streakText(3) == "Streak: 3"
+    assert game.streakText(3).isascii()    # the canvas does not draw emoji
+    assert (game.showStreakStar(2), game.showStreakStar(3)) == (False, True)
+
+
+@pytest.mark.parametrize("text, expected", [
+    ("Is a bug an intended feature in a program?", ("Is a bug an intended feature in a program?", "")),
+    ("ab " * 21 + "a", ("ab " * 21 + "a", "")),                   # 64 characters: exactly at the limit
+    ("ab " * 21 + "ab", ("ab " * 10 + "ab", "ab " * 10 + "ab")),    # 65 characters: one over the limit
+    ("aaaa bbbb " * 6 + "cccc dddd", ("aaaa bbbb aaaa bbbb aaaa bbbb aaaa", "bbbb aaaa bbbb aaaa bbbb cccc dddd")),
+])
+def test_wrap_prompt(game, text, expected):
+    assert game.wrapPrompt(text) == expected
+
+
+@pytest.mark.parametrize("key, expected", [("Y", "y"), ("N", "n"), ("y", "y"), ("space", "space"), ("A", "A")])
+def test_normalize_key(game, key, expected):
+    assert game.normalizeKey(key) == expected
 
 
 def test_curriculum_is_well_formed(game):
@@ -94,6 +109,8 @@ def test_curriculum_is_well_formed(game):
         for puzzle in pool:
             assert puzzle["ans"] in ("y", "n")
             assert puzzle["prompt"].endswith("?")
+            assert len(puzzle["prompt"]) <= 2 * game.MAX_PROMPT_CHARS
+            assert all(len(line) <= game.MAX_PROMPT_CHARS for line in game.wrapPrompt(puzzle["prompt"]))
             expected_word = "True." if puzzle["ans"] == "y" else "False."
             assert puzzle["correction"].startswith(expected_word)
 
@@ -116,7 +133,7 @@ def test_first_scenario_is_loaded(game):
 def test_other_keys_are_ignored(game):
     app = game.app
     before = (app.totalQuestions, app.errors, game.termLabel.value)
-    for key in ["a", "space", "enter", "Y", "N", "1"]:
+    for key in ["a", "space", "enter", "A", "1", "left"]:
         game.onKeyPress(key)
     assert (app.totalQuestions, app.errors, game.termLabel.value) == before
 
@@ -144,14 +161,17 @@ def test_first_try_answer_updates_accuracy_counters(game):
     assert app.missStreak == 1
 
 
-def test_three_streak_promotes_and_shows_flame(game):
+def test_three_streak_promotes_and_shows_star(game):
     app = game.app
-    for _ in range(3):
+    for _ in range(2):
         answer(game, 8)
+    assert game.streakStar.visible is False
+    answer(game, 8)
     assert app.difficulty == 2
     assert app.lastReason == "streak"
     assert app.currentStreak == 3
-    assert game.streakLabel.value == "Streak: 3 \U0001F525"
+    assert game.streakLabel.value == "Streak: 3"
+    assert game.streakStar.visible is True
     assert game.tierLabel.value == "Tier: 2"
 
 

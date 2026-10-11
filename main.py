@@ -17,6 +17,7 @@ SLOW_SECONDS = 15.0      # Slower than this = cognitive overload
 STREAK_TO_PROMOTE = 3    # Every 3rd consecutive first-try answer promotes
 MISSES_TO_DEMOTE = 2     # 2 consecutive first-try misses demote
 SESSION_SECONDS = 180    # 3-minute session
+MAX_PROMPT_CHARS = 64    # Longest prompt line that fits the 400-unit canvas
 
 # Session Tracking (3-Minute Limit)
 app.globalTimeTicks = 0
@@ -77,23 +78,26 @@ app.topics = {1: "Tier 1: Basics", 2: "Tier 2: Control Flow", 3: "Tier 3: Scope"
 app.background = 'ghostWhite'
 
 # Persistent Header
-Rect(0, 0, 400, 60, fill='slateGray')
+Rect(0, 0, 400, 60, fill='darkSlateGray')
 Label("CS Principles - Dynamic Vocab Engine", 200, 30, fill='white', size=16, bold=True)
 
 # Game UI Group
 tierLabel = Label("Tier: 1", 70, 90, size=14, bold=True)
 timeLabel = Label("Time: 0.0s", 200, 90, size=14)
-errorLabel = Label("Errors: 0", 330, 90, size=14, fill='red')
-streakLabel = Label("Streak: 0", 200, 110, size=12, fill='orange', bold=True)
+errorLabel = Label("Errors: 0", 330, 90, size=14, fill='fireBrick')
+streakLabel = Label("Streak: 0", 200, 110, size=12, fill='sienna', bold=True)
+streakStar = Star(154, 110, 7, 5, fill='sienna', visible=False)   # Shown from a 3-answer streak
 globalTimerLabel = Label(f"Session Time Left: {SESSION_SECONDS}s", 200, 380, size=14, bold=True)
 
 topicLabel = Label("", 200, 140, size=18, bold=True, fill='midnightBlue')
 termLabel = Label("", 200, 175, size=22, bold=True, fill='crimson')
 promptLabel = Label("", 200, 220, size=13)
+promptLabel2 = Label("", 200, 229, size=13)   # Second line for long prompts
 feedbackLabel = Label("", 200, 270, size=12, fill='darkGreen')
 instrLabel = Label("Press 'Y' for True | Press 'N' for False", 200, 340, size=14)
 
-app.gameUI = Group(tierLabel, timeLabel, errorLabel, streakLabel, globalTimerLabel, topicLabel, termLabel, promptLabel, feedbackLabel, instrLabel)
+app.gameUI = Group(tierLabel, timeLabel, errorLabel, streakLabel, streakStar, globalTimerLabel, topicLabel,
+                   termLabel, promptLabel, promptLabel2, feedbackLabel, instrLabel)
 
 # Report UI Group (Hidden initially)
 app.reportBg = Rect(50, 80, 300, 240, fill='white', border='black')
@@ -152,14 +156,47 @@ def secondsRemaining(globalTicks, stepsPerSecond):
     return max(0, SESSION_SECONDS - globalTicks // stepsPerSecond)
 
 def streakText(streak):
-    """Streak label text; the flame appears from a 3-answer streak onward."""
-    if streak >= STREAK_TO_PROMOTE:
-        return f"Streak: {streak} \U0001F525"
+    """Streak label text. Plain text only: the canvas does not draw emoji."""
     return f"Streak: {streak}"
+
+def showStreakStar(streak):
+    """The star beside the streak label appears from a 3-answer streak onward."""
+    return streak >= STREAK_TO_PROMOTE
+
+def wrapPrompt(text):
+    """Split a prompt that is too long for one line into two balanced lines.
+    Returns (line1, line2); line2 is empty when the prompt fits on one line."""
+    if len(text) <= MAX_PROMPT_CHARS:
+        return text, ""
+    words = text.split(" ")
+    best = 1
+    for i in range(1, len(words)):
+        left = len(" ".join(words[:i]))
+        bestLeft = len(" ".join(words[:best]))
+        if abs(2 * left - len(text)) < abs(2 * bestLeft - len(text)):
+            best = i
+    return " ".join(words[:best]), " ".join(words[best:])
+
+def normalizeKey(key):
+    """Treat capital Y and N (Caps Lock or Shift) as y and n."""
+    if key in ('Y', 'N'):
+        return key.lower()
+    return key
 
 # ==============================================================================
 # 5. ENGINE STATE & UI UPDATES
 # ==============================================================================
+def showPrompt(text):
+    """Write the prompt on one line, or on two lines when it is long."""
+    line1, line2 = wrapPrompt(text)
+    promptLabel.value = line1
+    promptLabel2.value = line2
+    promptLabel.centerY = 220 if line2 == "" else 212
+
+def showStreak():
+    streakLabel.value = streakText(app.currentStreak)
+    streakStar.visible = showStreakStar(app.currentStreak)
+
 def loadScenario():
     app.timeTicks = 0
     app.errors = 0
@@ -169,10 +206,10 @@ def loadScenario():
     tierLabel.value = f"Tier: {app.difficulty}"
     topicLabel.value = app.topics[app.difficulty]
     termLabel.value = f"Term: {puzzle['term']}"
-    promptLabel.value = puzzle["prompt"]
+    showPrompt(puzzle["prompt"])
 
     errorLabel.value = "Errors: 0"
-    streakLabel.value = streakText(app.currentStreak)
+    showStreak()
 
     app.correctKey = puzzle["ans"]
     app.currentCorrection = puzzle["correction"]
@@ -228,7 +265,8 @@ def onStep():
         triggerReport()
 
 def onKeyPress(key):
-    # Only 'y' and 'n' are accepted; every other key is ignored
+    # Only y and n (in either case) are accepted; every other key is ignored
+    key = normalizeKey(key)
     if app.isGameOver or key not in ['y', 'n']:
         return
 
@@ -242,7 +280,7 @@ def onKeyPress(key):
         app.errors += 1
         app.currentStreak = 0 # Break streak on error
         errorLabel.value = f"Errors: {app.errors}"
-        streakLabel.value = streakText(app.currentStreak)
+        showStreak()
         feedbackLabel.value = app.currentCorrection
 
 loadScenario()

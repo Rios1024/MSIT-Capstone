@@ -3,12 +3,12 @@
     {
       "label": "Header title",
       "text": "white",
-      "background": "slateGray",
+      "background": "darkSlateGray",
       "size_px": 16,
       "bold": true,
-      "ratio": 4.05,
+      "ratio": 8.93,
       "required": 4.5,
-      "pass": false
+      "pass": true
     },
     {
       "label": "Tier",
@@ -32,23 +32,23 @@
     },
     {
       "label": "Errors",
-      "text": "red",
+      "text": "fireBrick",
       "background": "ghostWhite",
       "size_px": 14,
       "bold": false,
-      "ratio": 3.78,
+      "ratio": 6.32,
       "required": 4.5,
-      "pass": false
+      "pass": true
     },
     {
       "label": "Streak",
-      "text": "orange",
+      "text": "sienna",
       "background": "ghostWhite",
       "size_px": 12,
       "bold": true,
-      "ratio": 1.87,
+      "ratio": 5.31,
       "required": 4.5,
-      "pass": false
+      "pass": true
     },
     {
       "label": "Topic",
@@ -125,37 +125,44 @@
     "prompt": {
       "size_px": 13,
       "total": 23,
-      "wider_than_canvas": 4,
+      "wider_than_canvas": 0,
+      "shown_on_two_lines": 7,
       "widest": [
         {
-          "width": 448.0,
+          "width": 370.8,
+          "tier": 2,
+          "term": "condition",
+          "lines": 1
+        },
+        {
+          "width": 362.8,
           "tier": 3,
-          "term": "return"
+          "term": "local variable",
+          "lines": 1
         },
         {
-          "width": 438.8,
-          "tier": 2,
-          "term": "while-loop"
-        },
-        {
-          "width": 435.8,
-          "tier": 2,
-          "term": "if-elif-else"
-        },
-        {
-          "width": 409.8,
-          "tier": 2,
-          "term": "conditional"
-        },
-        {
-          "width": 380.2,
+          "width": 357.1,
           "tier": 3,
-          "term": "parameters"
+          "term": "helper function",
+          "lines": 1
         },
         {
-          "width": 373.6,
+          "width": 353.5,
           "tier": 1,
-          "term": "syntax"
+          "term": "variable",
+          "lines": 1
+        },
+        {
+          "width": 341.2,
+          "tier": 1,
+          "term": "string",
+          "lines": 1
+        },
+        {
+          "width": 333.2,
+          "tier": 3,
+          "term": "arguments",
+          "lines": 1
         }
       ]
     },
@@ -163,36 +170,43 @@
       "size_px": 12,
       "total": 23,
       "wider_than_canvas": 0,
+      "shown_on_two_lines": 0,
       "widest": [
         {
           "width": 372.8,
           "tier": 3,
-          "term": "parameters"
+          "term": "parameters",
+          "lines": 1
         },
         {
           "width": 372.1,
           "tier": 2,
-          "term": "conditional"
+          "term": "conditional",
+          "lines": 1
         },
         {
           "width": 369.5,
           "tier": 1,
-          "term": "pseudocode"
+          "term": "pseudocode",
+          "lines": 1
         },
         {
           "width": 364.8,
           "tier": 2,
-          "term": "condition"
+          "term": "condition",
+          "lines": 1
         },
         {
           "width": 361.4,
           "tier": 1,
-          "term": "variable"
+          "term": "variable",
+          "lines": 1
         },
         {
           "width": 358.3,
           "tier": 2,
-          "term": "event"
+          "term": "event",
+          "lines": 1
         }
       ]
     }

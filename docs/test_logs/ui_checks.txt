@@ -1,0 +1,34 @@
+$ python eval/ui_checks.py
+1. Text contrast (WCAG 2.2 success criterion 1.4.3, level AA)
+   label           colours                       size  ratio  needs  result
+   Header title    white on darkSlateGray        16 bold  8.93   4.5   pass
+   Tier            black on ghostWhite           14 bold 19.86   4.5   pass
+   Time            black on ghostWhite           14      19.86   4.5   pass
+   Errors          fireBrick on ghostWhite       14       6.32   4.5   pass
+   Streak          sienna on ghostWhite          12 bold  5.31   4.5   pass
+   Topic           midnightBlue on ghostWhite    18 bold 14.04   4.5   pass
+   Term            crimson on ghostWhite         22 bold  4.72   3.0   pass
+   Prompt          black on ghostWhite           13      19.86   4.5   pass
+   Correction      darkGreen on ghostWhite       12       7.04   4.5   pass
+   Instructions    black on ghostWhite           14      19.86   4.5   pass
+   Session timer   black on ghostWhite           14 bold 19.86   4.5   pass
+   Report text     black on white                16      21.00   4.5   pass
+   12 of 12 labels pass; failing: none
+
+2. Text width against the 400-unit canvas (LiberationSans-Regular.ttf)
+   prompts at size 13: 0 of 23 are wider than the canvas; 7 are shown on two lines
+      370.8  Tier 2  condition        fits  (1 line)
+      362.8  Tier 3  local variable   fits  (1 line)
+      357.1  Tier 3  helper function  fits  (1 line)
+      353.5  Tier 1  variable         fits  (1 line)
+      341.2  Tier 1  string           fits  (1 line)
+      333.2  Tier 3  arguments        fits  (1 line)
+   corrections at size 12: 0 of 23 are wider than the canvas
+      372.8  Tier 3  parameters       fits  (1 line)
+      372.1  Tier 2  conditional      fits  (1 line)
+      369.5  Tier 1  pseudocode       fits  (1 line)
+      364.8  Tier 2  condition        fits  (1 line)
+      361.4  Tier 1  variable         fits  (1 line)
+      358.3  Tier 2  event            fits  (1 line)
+
+   results written to eval/results/ui_checks.json

@@ -1,7 +1,7 @@
 """Mutation check: plant one fault at a time in a copy of main.py and confirm
 that the test suite fails. A fault the tests do not notice is a "survivor".
 
-The 24 faults are hand-written, one per rule, boundary or hand-off.
+The 30 faults are hand-written, one per rule, boundary or hand-off.
 
 Usage:  python eval/mutation_check.py
 """
@@ -27,7 +27,7 @@ MUTATIONS = [
     ('if p["term"] != lastTerm', "if True"),
     ("int(firstTryCorrect * 100 / totalQuestions)", "round(firstTryCorrect * 100 / totalQuestions)"),
     ("SESSION_SECONDS - globalTicks // stepsPerSecond", "SESSION_SECONDS - globalTicks / stepsPerSecond"),
-    ("if streak >= STREAK_TO_PROMOTE:\n        return f", "if streak > STREAK_TO_PROMOTE:\n        return f"),
+    ("return streak >= STREAK_TO_PROMOTE", "return streak > STREAK_TO_PROMOTE"),
     ("    if app.lastReason == 'overload':\n        app.currentStreak = 0\n        app.missStreak = 0\n", ""),
     ("if app.difficulty > app.highestTier:", "if True:"),
     ("app.globalTimeTicks >= app.sessionLimitTicks", "app.globalTimeTicks > app.sessionLimitTicks"),
@@ -38,6 +38,12 @@ MUTATIONS = [
     ("        feedbackLabel.value = app.currentCorrection\n", ""),
     ('    feedbackLabel.value = ""\n', ""),
     ("    app.gameUI.visible = False\n", ""),
+    ("if len(text) <= MAX_PROMPT_CHARS:", "if len(text) < MAX_PROMPT_CHARS:"),
+    ("if abs(2 * left - len(text)) < abs(2 * bestLeft - len(text)):", "if abs(2 * left - len(text)) > abs(2 * bestLeft - len(text)):"),
+    ("    promptLabel2.value = line2\n", ""),
+    ("if key in ('Y', 'N'):", "if key in ('Y',):"),
+    ("    streakStar.visible = showStreakStar(app.currentStreak)\n", ""),
+    ("fill='fireBrick'", "fill='red'"),
 ]
 
 

@@ -1,0 +1,24 @@
+$ python eval/acceptance.py
+Acceptance checklist - Dynamic CS Vocabulary Engine v0.4.1
+
+  FR1   ACCEPTED  One term and one True/False question; Y and N keys only
+                  4 of 4 tests; sandbox ignored 3 other key presses
+  FR2   ACCEPTED  Tier raised, held or lowered from time and errors
+                  17 of 17 tests; sandbox matched the rules on 13 of 13 answers (flow, overload, steady, streak)
+  FR3   NOT MET   Teacher can set the tier by hand
+                  no manual tier override in main.py (deferred; listed as open in the README)
+  FR4   ACCEPTED  Report at the end; nothing stored between sessions
+                  3 of 3 tests; sandbox report equals the hand tally; no file calls
+  NFR1  ACCEPTED  Security: restricted input, no dynamic execution, no files
+                  2 of 2 tests; no eval, exec, open or input call; only import is random
+  NFR2  ACCEPTED  Usability: labels fully visible; contrast 4.5:1
+                  19 of 19 tests; 12 of 12 labels meet the contrast minimum; 0 texts too wide
+  NFR3  ACCEPTED  Performance: response within 1 s (target 0.1 s)
+                  slowest of 36 sandbox responses 60.7 ms (limit 1,000; target 100)
+  NFR4  ACCEPTED  Reliability: unexpected and late input ignored
+                  3 of 3 tests; 1 key press after the report changed nothing
+  NFR5  ACCEPTED  Scalability: terms are data
+                  2 of 2 tests; a term added to the data is served with no change to the engine
+
+  accepted: 8 of 9 requirements
+  results written to eval/results/acceptance.json

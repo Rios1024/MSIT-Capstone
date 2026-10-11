@@ -1,0 +1,61 @@
+{
+ "release": "v0.4.1",
+ "accepted": 8,
+ "total": 9,
+ "rows": [
+  {
+   "requirement": "FR1",
+   "criterion": "One term and one True/False question; Y and N keys only",
+   "accepted": true,
+   "evidence": "4 of 4 tests; sandbox ignored 3 other key presses"
+  },
+  {
+   "requirement": "FR2",
+   "criterion": "Tier raised, held or lowered from time and errors",
+   "accepted": true,
+   "evidence": "17 of 17 tests; sandbox matched the rules on 13 of 13 answers (flow, overload, steady, streak)"
+  },
+  {
+   "requirement": "FR3",
+   "criterion": "Teacher can set the tier by hand",
+   "accepted": false,
+   "evidence": "no manual tier override in main.py (deferred; listed as open in the README)"
+  },
+  {
+   "requirement": "FR4",
+   "criterion": "Report at the end; nothing stored between sessions",
+   "accepted": true,
+   "evidence": "3 of 3 tests; sandbox report equals the hand tally; no file calls"
+  },
+  {
+   "requirement": "NFR1",
+   "criterion": "Security: restricted input, no dynamic execution, no files",
+   "accepted": true,
+   "evidence": "2 of 2 tests; no eval, exec, open or input call; only import is random"
+  },
+  {
+   "requirement": "NFR2",
+   "criterion": "Usability: labels fully visible; contrast 4.5:1",
+   "accepted": true,
+   "evidence": "19 of 19 tests; 12 of 12 labels meet the contrast minimum; 0 texts too wide"
+  },
+  {
+   "requirement": "NFR3",
+   "criterion": "Performance: response within 1 s (target 0.1 s)",
+   "accepted": true,
+   "evidence": "slowest of 36 sandbox responses 60.7 ms (limit 1,000; target 100)"
+  },
+  {
+   "requirement": "NFR4",
+   "criterion": "Reliability: unexpected and late input ignored",
+   "accepted": true,
+   "evidence": "3 of 3 tests; 1 key press after the report changed nothing"
+  },
+  {
+   "requirement": "NFR5",
+   "criterion": "Scalability: terms are data",
+   "accepted": true,
+   "evidence": "2 of 2 tests; a term added to the data is served with no change to the engine"
+  }
+ ]
+}

@@ -44,7 +44,7 @@ def placement():
     fig, ax = plt.subplots(figsize=(6.4, 3.5))
     width = 0.3
     for offset, version, colour, label in ((-0.16, "v0.2.0", BLUE, "v0.2.0 (prototype)"),
-                                           (0.16, "current", ORANGE, "v0.3.0 (current)")):
+                                           (0.16, "current", ORANGE, "current rules (v0.3.0 onward)")):
         xs = [m + offset for m in (1, 2, 3)]
         values = [learners[str(m)][version]["on_target_pct"] for m in (1, 2, 3)]
         ax.bar(xs, values, width=width, color=colour, label=label)
@@ -96,8 +96,8 @@ def session_tiers():
     fig, ax = plt.subplots(figsize=(6.4, 3.2))
     ax.step(xs, tiers, where="post", color=BLUE, linewidth=2)
     ax.scatter(xs[1:], tiers[1:], s=40, color=BLUE, edgecolor="white", linewidth=1.4, zorder=3)
-    notes = {4: ("streak of 3", 0.22), 7: ("streak of 6", 0.22), 8: ("19.6 s answer", -0.34),
-             10: ("1.6 s answer", 0.22), 12: ("2 misses in a row", -0.34)}
+    notes = {4: ("streak of 3", 0.22), 8: ("1.3 s answer", 0.22), 9: ("23.7 s answer", -0.34),
+             11: ("2 misses in a row", -0.34)}
     for r in rows:
         if r["q"] in notes:
             text, dy = notes[r["q"]]
@@ -107,7 +107,7 @@ def session_tiers():
     ax.set_ylim(0.5, 3.6)
     ax.set_xlim(-0.3, len(rows) + 0.6)
     ax.set_xlabel("Questions answered")
-    ax.set_title("Difficulty tier during the recorded three-minute session", loc="left", color=INK, fontsize=11)
+    ax.set_title("Difficulty tier during the recorded v0.4.1 system test session", loc="left", color=INK, fontsize=11)
     soften(ax)
     fig.tight_layout()
     fig.savefig(os.path.join(RESULTS, "fig_session_tiers.png"))

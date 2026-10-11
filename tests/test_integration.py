@@ -17,6 +17,11 @@ def shown_term(game):
     return game.termLabel.value.replace("Term: ", "", 1)
 
 
+def shown_prompt(game):
+    """The prompt as displayed: one line, or two lines joined by a space."""
+    return " ".join(line for line in (game.promptLabel.value, game.promptLabel2.value) if line)
+
+
 def assert_ui_matches_state(game):
     """Interface <-> state manager: every label mirrors the engine state."""
     app = game.app
@@ -24,6 +29,7 @@ def assert_ui_matches_state(game):
     assert game.topicLabel.value == app.topics[app.difficulty]
     assert game.errorLabel.value == f"Errors: {app.errors}"
     assert game.streakLabel.value == game.streakText(app.currentStreak)
+    assert game.streakStar.visible == (app.currentStreak >= 3)
     # Data layer <-> interface: the term on screen comes from the active tier
     assert shown_term(game) in pool_terms(game, app.difficulty)
     assert shown_term(game) == app.lastTerm
@@ -69,7 +75,7 @@ def test_wrong_key_feedback_comes_from_the_same_curriculum_entry(game):
     for _ in range(25):
         term = shown_term(game)
         entry = next(p for p in app.curriculum[app.difficulty] if p["term"] == term)
-        assert game.promptLabel.value == entry["prompt"]
+        assert shown_prompt(game) == entry["prompt"]
         assert app.correctKey == entry["ans"]
         game.onKeyPress(wrong_key(game))
         assert game.feedbackLabel.value == entry["correction"]
@@ -130,4 +136,28 @@ def test_random_input_never_breaks_the_system(game):
             app.globalTimeTicks = 0
             app.reportUI.visible = False
             app.gameUI.visible = True
+            game.showStreak()
         assert_ui_matches_state(game)
+
+
+def test_new_terms_can_be_added_without_changing_the_engine(game):
+    """Scalability: the curriculum is data. A term added at run time is served,
+    wrapped, corrected and scored by the unchanged engine."""
+    app = game.app
+    app.curriculum[2].append({
+        "term": "nested loop",
+        "prompt": "Does the inner loop of a nested loop finish all of its passes on each pass of the outer loop?",
+        "ans": "y", "correction": "True. The inner loop runs to completion every time the outer loop repeats."})
+    app.difficulty = 2
+    seen = False
+    for _ in range(300):
+        game.loadScenario()
+        if app.lastTerm == "nested loop":
+            seen = True
+            assert game.promptLabel2.value != ""            # long prompt wrapped
+            game.onKeyPress("n")
+            assert game.feedbackLabel.value.startswith("True. The inner loop")
+            game.onKeyPress("y")
+            break
+    assert seen
+    assert_ui_matches_state(game)

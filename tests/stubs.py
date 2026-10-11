@@ -1,7 +1,7 @@
 """Stand-ins for the CMU Graphics runtime.
 
-CS Academy runs main.py as a single file and supplies `app`, `Label`, `Rect`
-and `Group` as globals. These stand-ins provide the same names with just
+CS Academy runs main.py as a single file and supplies `app`, `Label`, `Rect`,
+`Star` and `Group` as globals. These stand-ins provide the same names with just
 enough behaviour for the engine to run, so the real file can be loaded and
 driven from PyTest or from the evaluation scripts without a graphics runtime.
 """
@@ -15,13 +15,23 @@ class FakeApp:
     """Stands in for the CMU Graphics `app` object (a plain attribute bag)."""
 
 
+CREATED = []     # every shape made by the most recent load, in order
+
+
 class FakeShape:
-    """Stands in for Label and Rect: remembers its arguments and properties."""
+    """Stands in for Label, Rect and Star: remembers its arguments and properties."""
 
     def __init__(self, *args, **kwargs):
+        CREATED.append(self)
         self.args = args
         self.value = args[0] if args and isinstance(args[0], str) else ""
         self.visible = True
+        self.fill = "black"          # CMU Graphics default
+        self.size = 12
+        self.bold = False
+        numbers = [a for a in args if isinstance(a, (int, float))]
+        if len(numbers) >= 2:
+            self.centerX, self.centerY = numbers[0], numbers[1]
         for name, val in kwargs.items():
             setattr(self, name, val)
 
@@ -61,10 +71,12 @@ def load_game(path=MAIN_PATH, seed=None):
     """Execute a single-file CS Academy program against the stand-ins."""
     if seed is not None:
         random.seed(seed)
+    CREATED.clear()
     namespace = {
         "app": FakeApp(),
         "Label": FakeShape,
         "Rect": FakeShape,
+        "Star": FakeShape,
         "Group": FakeGroup,
         "__name__": "main",
         "__file__": path,    # lets the stdlib trace module attribute lines

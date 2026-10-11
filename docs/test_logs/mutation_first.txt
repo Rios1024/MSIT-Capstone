@@ -1,0 +1,9 @@
+$ python eval/mutation_check.py          (first run on v0.4.1)
+  24  detected  app.gameUI.visible = False
+  25  SURVIVED  if len(text) <= MAX_PROMPT_CHARS:
+  26  detected  if abs(2 * left - len(text)) < abs(2 * bestLeft - le
+  27  detected  promptLabel2.value = line2
+  28  detected  if key in ('Y', 'N'):
+  29  detected  streakStar.visible = showStreakStar(app.currentStrea
+  30  detected  fill='fireBrick'
+  faults detected: 29 of 30

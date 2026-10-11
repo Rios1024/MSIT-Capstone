@@ -1,0 +1,300 @@
+{
+  "note": "Recorded in the live CS Academy sandbox on 10 October 2026. A script in the page sampled the 400x400 canvas about 270 times per second and logged every change; key presses were sent by a browser automation tool and time-stamped by the page's own keydown listener. Times are performance.now() milliseconds. Sampling resolution is about 4 ms.",
+  "environment": {
+    "browser": "Chrome 154",
+    "os": "Windows",
+    "logical_cores": 12,
+    "device_memory_gb": 32,
+    "canvas": "400x400",
+    "tab_state": "background tab (visibilityState hidden)"
+  },
+  "session_1": {
+    "run_click_ms": 1783878.1,
+    "first_frame_ms": 1783989.0,
+    "report_shown_ms": 1963982.3,
+    "keys": [
+      [
+        1791251.4,
+        "n"
+      ],
+      [
+        1797610.9,
+        "y"
+      ],
+      [
+        1802845.2,
+        "n"
+      ],
+      [
+        1813270.3,
+        "y"
+      ],
+      [
+        1820841.8,
+        "n"
+      ],
+      [
+        1834035.6,
+        "y"
+      ],
+      [
+        1839926.9,
+        "y"
+      ],
+      [
+        1844994.6,
+        "y"
+      ],
+      [
+        1864689.0,
+        "n"
+      ],
+      [
+        1875790.5,
+        "n"
+      ],
+      [
+        1877457.7,
+        "y"
+      ],
+      [
+        1885530.4,
+        "n"
+      ],
+      [
+        1886036.5,
+        "y"
+      ],
+      [
+        1893000.5,
+        "n"
+      ],
+      [
+        1893571.7,
+        "y"
+      ],
+      [
+        1905193.3,
+        "a"
+      ],
+      [
+        1905196.1,
+        " "
+      ],
+      [
+        1905762.7,
+        "y"
+      ],
+      [
+        1913993.1,
+        "n"
+      ],
+      [
+        1977806.7,
+        "n"
+      ]
+    ],
+    "question_area_changes_ms": [
+      1791313.2,
+      1797666.9,
+      1802900.1,
+      1813326.6,
+      1820897.1,
+      1834090.1,
+      1839982.6,
+      1845048.9,
+      1864742.6,
+      1875845.0,
+      1877462.2,
+      1885586.3,
+      1886091.9,
+      1893055.3,
+      1893636.7,
+      1905768.0,
+      1914048.7,
+      1963982.3
+    ],
+    "step_interval_ms": {
+      "n": 1791,
+      "mean": 100.44,
+      "sd": 7.111,
+      "min": 49.2,
+      "p05": 97.5,
+      "p50": 99.9,
+      "p95": 102.6,
+      "p99": 105.1,
+      "max": 203.6,
+      "within_10ms_of_100": 1780,
+      "histogram_4ms_bins": {
+        "48": 1,
+        "88": 1,
+        "92": 3,
+        "96": 167,
+        "100": 1404,
+        "104": 202,
+        "108": 4,
+        "152": 1,
+        "196": 1,
+        "200": 5,
+        "204": 2
+      }
+    },
+    "countdown_interval_ms": {
+      "n": 179,
+      "mean": 1000.023,
+      "sd": 10.768,
+      "min": 899.0,
+      "p05": 997.6,
+      "p50": 1000.0,
+      "p95": 1002.4,
+      "p99": 1005.6,
+      "max": 1100.2
+    },
+    "report_on_screen": {
+      "questions_answered": 14,
+      "first_try_accuracy_pct": 78,
+      "highest_tier": 3
+    },
+    "manual_tally": {
+      "questions_answered": 14,
+      "first_try_correct": 11,
+      "highest_tier": 3
+    },
+    "observed_on_screen": [
+      {
+        "q": 1,
+        "term": "variable",
+        "tier_shown": 1,
+        "keys": "n, y",
+        "tier_after": 1,
+        "streak_after": 0
+      },
+      {
+        "q": 2,
+        "term": "booleans",
+        "tier_shown": 1,
+        "keys": "n",
+        "tier_after": 1,
+        "streak_after": 1
+      },
+      {
+        "q": 3,
+        "term": "characters",
+        "tier_shown": 1,
+        "keys": "y",
+        "tier_after": 1,
+        "streak_after": 2
+      },
+      {
+        "q": 4,
+        "term": "bug",
+        "tier_shown": 1,
+        "keys": "n",
+        "tier_after": 2,
+        "streak_after": 3
+      },
+      {
+        "q": 5,
+        "term": "if-elif-else",
+        "tier_shown": 2,
+        "keys": "y",
+        "tier_after": 2,
+        "streak_after": 4
+      },
+      {
+        "q": 6,
+        "term": "event",
+        "tier_shown": 2,
+        "keys": "y",
+        "tier_after": 2,
+        "streak_after": 5
+      },
+      {
+        "q": 7,
+        "term": "while-loop",
+        "tier_shown": 2,
+        "keys": "y",
+        "tier_after": 3,
+        "streak_after": 6
+      },
+      {
+        "q": 8,
+        "term": "local variable",
+        "tier_shown": 3,
+        "keys": "n",
+        "tier_after": 2,
+        "streak_after": 0
+      },
+      {
+        "q": 9,
+        "term": "condition",
+        "tier_shown": 2,
+        "keys": "n",
+        "tier_after": 2,
+        "streak_after": 1
+      },
+      {
+        "q": 10,
+        "term": "event",
+        "tier_shown": 2,
+        "keys": "y",
+        "tier_after": 3,
+        "streak_after": 2
+      },
+      {
+        "q": 11,
+        "term": "helper function",
+        "tier_shown": 3,
+        "keys": "n, y",
+        "tier_after": 3,
+        "streak_after": 0
+      },
+      {
+        "q": 12,
+        "term": "return",
+        "tier_shown": 3,
+        "keys": "n, y",
+        "tier_after": 2,
+        "streak_after": 0
+      },
+      {
+        "q": 13,
+        "term": "while-loop",
+        "tier_shown": 2,
+        "keys": "a, space, y",
+        "tier_after": 2,
+        "streak_after": 1
+      },
+      {
+        "q": 14,
+        "term": "for-loop",
+        "tier_shown": 2,
+        "keys": "n",
+        "tier_after": 2,
+        "streak_after": 2
+      }
+    ]
+  },
+  "session_2_key_to_display_ms": [
+    58.9,
+    58.8,
+    54.6,
+    54.0,
+    55.1,
+    56.8,
+    60.0,
+    56.2,
+    55.4,
+    56.0,
+    58.9,
+    56.6,
+    57.7,
+    54.5,
+    59.5,
+    58.5,
+    55.3,
+    57.1,
+    57.2,
+    56.1
+  ]
+}

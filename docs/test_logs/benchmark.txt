@@ -1,0 +1,16 @@
+$ python eval/benchmark.py
+Dynamic CS Vocabulary Engine - engine benchmark
+  CPython 3.13.16 on Linux x86_64 (CPython with graphics stand-ins; excludes browser drawing)
+
+  nextDifficulty()                206.2 ns mean   (999,864 calls)
+  answer cycle (key -> next)      3.139 us median  p95 11.527  p99 21.619  max 3152.5  (n=200,000)
+  answer-cycle throughput       179,565 per second
+  onStep() tick                   0.791 us median  p95 0.912  p99 1.467  max 89.5  (n=200,000)
+  load main.py                    1.688 ms median  p95 2.985  (n=200)
+  peak heap while loading         920.1 KiB   (compiling the source)
+  heap held after load             30.8 KiB
+  peak heap, full session          32.1 KiB   (29 questions, 31.3 KiB at the end)
+  main.py source size            14,869 bytes
+
+  NFR: a decision in under 1 s. Slowest answer cycle observed: 3.153 ms
+  results written to eval/results/benchmark.json

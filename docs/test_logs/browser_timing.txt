@@ -1,0 +1,39 @@
+Dynamic CS Vocabulary Engine v0.4.1 - timing in the CS Academy sandbox
+  Chrome 154 on Windows, canvas 400x400, background tab (visibilityState hidden)
+
+Key press to updated display
+  session 1 (scripted play)   n=16  median 55.2  mean 50.0  min 6.6  max 60.7 ms
+  session 2 (20 rapid keys)   n=20  median 54.4  mean 54.5  min 53.3  max 55.6 ms
+  both sessions               n=36  median 54.8  mean 52.5  min 6.6  max 60.7 ms
+  presses slower than 100 ms  0 of 36
+  presses with no display change (invalid key, or after the session ended): 3 ['a', 'space', 'y']
+  capital letters accepted (script-dispatched, left out of the timing): 1 ['Y']
+
+Clock accuracy over one full session
+  step interval (target 100 ms)       mean 100.28  median 100.0  p95 101.3  max 200.5 ms  (n=1793)
+  steps within 10 ms of target        1776 of 1793 (99.1%)
+  countdown interval (target 1000 ms) mean 1000.04  sd 1.1  min 996  max 1007 ms  (n=179)
+  Run click to report (target 180 s)  180.155 s  (+0.09%)
+  first frame to report               179.990 s
+  start-up (Run click to first frame) 165 ms
+
+Input-output log of session 1, with the same inputs replayed through main.py
+   Q  term             tier  keys         seconds  errors  rule      tier after  streak   replay
+   1  booleans           1   y, n           14.5       1  steady            1       0   match
+   2  variable           1   Y               9.5       0  steady            1       1   match
+   3  integer            1   n              12.1       0  steady            1       2   match
+   4  bug                1   n               7.9       0  streak            2       3   match
+   5  for-loop           2   n              10.8       0  steady            2       4   match
+   6  while-loop         2   n, y           11.7       1  steady            2       0   match
+   7  for-loop           2   a, space, n    13.4       0  steady            2       1   match
+   8  if-elif-else       2   y               1.3       0  flow              3       2   match
+   9  arguments          3   y              23.7       0  overload          2       0   match
+  10  event              2   n, y            9.1       1  steady            2       0   match
+  11  conditional        2   y, n            8.6       1  overload          1       0   match
+  12  type               1   y               8.3       0  steady            1       1   match
+  13  string             1   n              10.3       0  steady            1       2   match
+  browser and replay agree on 13 of 13 answers
+
+End-of-session report against a hand tally of the same session
+  on screen : 13 questions, 69% first-try, highest tier 3
+  hand tally: 13 questions, 9 first-try (69%), highest tier 3

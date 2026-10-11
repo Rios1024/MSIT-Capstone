@@ -1,0 +1,33 @@
+$ python eval/mutation_check.py
+Mutation check: one planted fault per run
+   1  detected  seconds > SLOW_SECONDS
+   2  detected  errors >= 2 or
+   3  detected  missStreak >= MISSES_TO_DEMOTE
+   4  detected  max(MIN_TIER, tier - 1), 'overload'
+   5  detected  streak > 0 and streak % STREAK_TO_PROMOTE == 0
+   6  detected  min(MAX_TIER, tier + 1), 'streak'
+   7  detected  seconds < FAST_SECONDS
+   8  detected  errors == 0 and seconds < FAST_SECONDS
+   9  detected  return streak + 1, 0
+  10  detected  return 0, missStreak + 1
+  11  detected  if p["term"] != lastTerm
+  12  detected  int(firstTryCorrect * 100 / totalQuestions)
+  13  detected  SESSION_SECONDS - globalTicks // stepsPerSecond
+  14  detected  return streak >= STREAK_TO_PROMOTE
+  15  detected  if app.lastReason == 'overload':
+  16  detected  if app.difficulty > app.highestTier:
+  17  detected  app.globalTimeTicks >= app.sessionLimitTicks
+  18  detected  if app.isGameOver or key not in ['y', 'n']:
+  19  detected  if app.errors == 0:
+  20  detected  app.currentStreak = 0 # Break streak on error
+  21  detected  if app.isGameOver:
+  22  detected  feedbackLabel.value = app.currentCorrection
+  23  detected  feedbackLabel.value = ""
+  24  detected  app.gameUI.visible = False
+  25  detected  if len(text) <= MAX_PROMPT_CHARS:
+  26  detected  if abs(2 * left - len(text)) < abs(2 * bestLeft - le
+  27  detected  promptLabel2.value = line2
+  28  detected  if key in ('Y', 'N'):
+  29  detected  streakStar.visible = showStreakStar(app.currentStrea
+  30  detected  fill='fireBrick'
+  faults detected: 30 of 30

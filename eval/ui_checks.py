@@ -30,24 +30,16 @@ FONT_PATHS = [
 # CSS colour names used in main.py
 COLOURS = {
     "black": (0, 0, 0), "white": (255, 255, 255), "ghostWhite": (248, 248, 255),
-    "slateGray": (112, 128, 144), "red": (255, 0, 0), "orange": (255, 165, 0),
+    "slateGray": (112, 128, 144), "darkSlateGray": (47, 79, 79), "red": (255, 0, 0),
+    "fireBrick": (178, 34, 34), "orange": (255, 165, 0), "sienna": (160, 82, 45),
     "midnightBlue": (25, 25, 112), "crimson": (220, 20, 60), "darkGreen": (0, 100, 0),
 }
 
-# (label, text colour, background, size in px, bold)
+# (name shown in the report, variable in main.py); colours and sizes are read from the code
 LABELS = [
-    ("Header title", "white", "slateGray", 16, True),
-    ("Tier", "black", "ghostWhite", 14, True),
-    ("Time", "black", "ghostWhite", 14, False),
-    ("Errors", "red", "ghostWhite", 14, False),
-    ("Streak", "orange", "ghostWhite", 12, True),
-    ("Topic", "midnightBlue", "ghostWhite", 18, True),
-    ("Term", "crimson", "ghostWhite", 22, True),
-    ("Prompt", "black", "ghostWhite", 13, False),
-    ("Correction", "darkGreen", "ghostWhite", 12, False),
-    ("Instructions", "black", "ghostWhite", 14, False),
-    ("Session timer", "black", "ghostWhite", 14, True),
-    ("Report text", "black", "white", 16, False),
+    ("Tier", "tierLabel"), ("Time", "timeLabel"), ("Errors", "errorLabel"), ("Streak", "streakLabel"),
+    ("Topic", "topicLabel"), ("Term", "termLabel"), ("Prompt", "promptLabel"),
+    ("Correction", "feedbackLabel"), ("Instructions", "instrLabel"), ("Session timer", "globalTimerLabel"),
 ]
 
 
@@ -76,25 +68,40 @@ def find_font():
     raise SystemExit("No Arial-compatible font found; edit FONT_PATHS.")
 
 
+def label_rows(game):
+    """Text colour, background, size and weight of every label, read from main.py."""
+    import stubs
+    header_bar, header_title = stubs.CREATED[0], stubs.CREATED[1]
+    rows = [("Header title", header_title.fill, header_bar.fill, header_title.size, header_title.bold)]
+    for name, variable in LABELS:
+        shape = getattr(game, variable)
+        rows.append((name, shape.fill, game.app.background, shape.size, shape.bold))
+    report = game.app.reportTotal
+    rows.append(("Report text", report.fill, game.app.reportBg.fill, report.size, report.bold))
+    return rows
+
+
 def main():
     results = {"contrast": [], "overflow": {}}
+    game = load_game(seed=1)
+    rows = label_rows(game)
 
     print("1. Text contrast (WCAG 2.2 success criterion 1.4.3, level AA)")
-    print("   label           colours                    size  ratio  needs  result")
-    for name, fg, bg, size, bold in LABELS:
+    print("   label           colours                       size  ratio  needs  result")
+    for name, fg, bg, size, bold in rows:
         ratio = contrast(fg, bg)
         needed = 3.0 if is_large(size, bold) else 4.5
         ok = ratio >= needed
         results["contrast"].append({"label": name, "text": fg, "background": bg, "size_px": size,
                                     "bold": bold, "ratio": round(ratio, 2), "required": needed, "pass": ok})
         weight = "bold" if bold else "    "
-        print(f"   {name:14s}  {fg + ' on ' + bg:25s}  {size:>2d} {weight} {ratio:5.2f}  {needed:4.1f}   "
+        print(f"   {name:14s}  {fg + ' on ' + bg:28s}  {size:>2d} {weight} {ratio:5.2f}  {needed:4.1f}   "
               f"{'pass' if ok else 'FAIL'}")
     failed = [c["label"] for c in results["contrast"] if not c["pass"]]
-    print(f"   {len(LABELS) - len(failed)} of {len(LABELS)} labels pass; failing: {', '.join(failed) or 'none'}")
+    print(f"   {len(rows) - len(failed)} of {len(rows)} labels pass; failing: {', '.join(failed) or 'none'}")
 
-    game = load_game(seed=1)
     font_path = find_font()
+    wrap = getattr(game, "wrapPrompt", lambda text: (text, ""))
     print()
     print(f"2. Text width against the {CANVAS_WIDTH}-unit canvas ({os.path.basename(font_path)})")
     for field, size in (("prompt", 13), ("correction", 12)):
@@ -102,15 +109,20 @@ def main():
         rows = []
         for tier, pool in game.app.curriculum.items():
             for puzzle in pool:
-                rows.append((round(font.getlength(puzzle[field]), 1), tier, puzzle["term"]))
+                lines = [l for l in wrap(puzzle[field])] if field == "prompt" else [puzzle[field]]
+                lines = [l for l in lines if l]
+                rows.append((round(max(font.getlength(l) for l in lines), 1), tier, puzzle["term"], len(lines)))
         rows.sort(reverse=True)
         over = [r for r in rows if r[0] > CANVAS_WIDTH]
+        two = sum(1 for r in rows if r[3] == 2)
         results["overflow"][field] = {"size_px": size, "total": len(rows), "wider_than_canvas": len(over),
-                                      "widest": [{"width": w, "tier": t, "term": term} for w, t, term in rows[:6]]}
-        print(f"   {field}s at size {size}: {len(over)} of {len(rows)} are wider than the canvas")
-        for width, tier, term in rows[:6]:
+                                      "shown_on_two_lines": two,
+                                      "widest": [{"width": w, "tier": t, "term": term, "lines": n} for w, t, term, n in rows[:6]]}
+        extra = f"; {two} are shown on two lines" if field == "prompt" else ""
+        print(f"   {field}s at size {size}: {len(over)} of {len(rows)} are wider than the canvas{extra}")
+        for width, tier, term, n in rows[:6]:
             flag = "CLIPPED" if width > CANVAS_WIDTH else "fits"
-            print(f"     {width:6.1f}  Tier {tier}  {term:16s} {flag}")
+            print(f"     {width:6.1f}  Tier {tier}  {term:16s} {flag}  ({n} line{'s' if n > 1 else ''})")
 
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     with open(OUT, "w", encoding="utf-8") as handle:

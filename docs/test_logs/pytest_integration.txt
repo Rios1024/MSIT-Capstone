@@ -1,0 +1,16 @@
+$ pytest tests/test_integration.py -v
+============================= test session starts ==============================
+platform linux -- Python 3.13.16, pytest-9.1.1, pluggy-1.6.0 -- /usr/bin/python3
+rootdir: /home/claude/work/v041
+plugins: anyio-4.15.1
+collecting ... collected 7 items
+
+tests/test_integration.py::test_key_press_flows_through_every_module PASSED [ 14%]
+tests/test_integration.py::test_climb_then_fall_keeps_ui_and_engine_in_step PASSED [ 28%]
+tests/test_integration.py::test_wrong_key_feedback_comes_from_the_same_curriculum_entry PASSED [ 42%]
+tests/test_integration.py::test_full_session_report_matches_engine_counters PASSED [ 57%]
+tests/test_integration.py::test_timer_labels_track_the_step_clock PASSED [ 71%]
+tests/test_integration.py::test_random_input_never_breaks_the_system PASSED [ 85%]
+tests/test_integration.py::test_new_terms_can_be_added_without_changing_the_engine PASSED [100%]
+
+============================== 7 passed in 0.12s ===============================

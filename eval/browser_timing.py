@@ -1,6 +1,7 @@
 """Summarise the in-browser timing recorded in results/browser_measurements.json.
 
-Usage:  python eval/browser_timing.py
+Usage:  python eval/browser_timing.py                                  (current release)
+        python eval/browser_timing.py browser_measurements_v0_3_0.json   (an earlier recording)
 """
 import json
 import os
@@ -11,7 +12,8 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "tests"))
 from stubs import load_game  # noqa: E402
 
-DATA = os.path.join(ROOT, "eval", "results", "browser_measurements.json")
+RESULTS = os.path.join(ROOT, "eval", "results")
+DATA = os.path.join(RESULTS, sys.argv[1] if len(sys.argv) > 1 and __name__ == "__main__" else "browser_measurements.json")
 
 
 def key_latencies(session):
@@ -34,7 +36,8 @@ def replay(session):
     changes = session["question_area_changes_ms"]
     shown = session["first_frame_ms"]
     tier, streak, misses = 1, 0, 0
-    keys = [(t, k) for t, k in session["keys"] if k in ("y", "n")]
+    keys = [(t, game.normalizeKey(k)) for t, k in session["keys"]]     # capital Y and N count from v0.4.1
+    keys = [(t, k) for t, k in keys if k in ("y", "n")]
     rows, index = [], 0
     for item in session["observed_on_screen"]:
         errors = 0
@@ -67,7 +70,7 @@ def main():
         data = json.load(handle)
     s1 = data["session_1"]
     env = data["environment"]
-    print("Dynamic CS Vocabulary Engine - timing in the CS Academy sandbox")
+    print(f"Dynamic CS Vocabulary Engine {data.get('release', 'v0.3.0')} - timing in the CS Academy sandbox")
     print(f"  {env['browser']} on {env['os']}, canvas {env['canvas']}, {env['tab_state']}")
     print()
 
@@ -83,6 +86,10 @@ def main():
     print(f"  presses slower than 100 ms  {slow} of {len(valid + second)}")
     print(f"  presses with no display change (invalid key, or after the session ended): "
           f"{len(ignored)} {[k if k != ' ' else 'space' for k in ignored]}")
+    capitals = [key for key, ms in rows if key in ("Y", "N") and ms is not None]
+    if capitals:
+        print(f"  capital letters accepted (script-dispatched, left out of the timing): "
+              f"{len(capitals)} {capitals}")
     print()
 
     step, tick = s1["step_interval_ms"], s1["countdown_interval_ms"]
