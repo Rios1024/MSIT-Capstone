@@ -1,0 +1,5 @@
+# Development and evaluation tools. The app itself needs nothing installed:
+# it runs in the CMU CS Academy sandbox in a browser.
+pytest>=9.0        # unit and integration tests
+pillow>=10.0       # eval/ui_checks.py (text width measurement)
+matplotlib>=3.8    # eval/charts.py

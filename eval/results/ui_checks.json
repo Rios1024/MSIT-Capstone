@@ -1,0 +1,200 @@
+{
+  "contrast": [
+    {
+      "label": "Header title",
+      "text": "white",
+      "background": "slateGray",
+      "size_px": 16,
+      "bold": true,
+      "ratio": 4.05,
+      "required": 4.5,
+      "pass": false
+    },
+    {
+      "label": "Tier",
+      "text": "black",
+      "background": "ghostWhite",
+      "size_px": 14,
+      "bold": true,
+      "ratio": 19.86,
+      "required": 4.5,
+      "pass": true
+    },
+    {
+      "label": "Time",
+      "text": "black",
+      "background": "ghostWhite",
+      "size_px": 14,
+      "bold": false,
+      "ratio": 19.86,
+      "required": 4.5,
+      "pass": true
+    },
+    {
+      "label": "Errors",
+      "text": "red",
+      "background": "ghostWhite",
+      "size_px": 14,
+      "bold": false,
+      "ratio": 3.78,
+      "required": 4.5,
+      "pass": false
+    },
+    {
+      "label": "Streak",
+      "text": "orange",
+      "background": "ghostWhite",
+      "size_px": 12,
+      "bold": true,
+      "ratio": 1.87,
+      "required": 4.5,
+      "pass": false
+    },
+    {
+      "label": "Topic",
+      "text": "midnightBlue",
+      "background": "ghostWhite",
+      "size_px": 18,
+      "bold": true,
+      "ratio": 14.04,
+      "required": 4.5,
+      "pass": true
+    },
+    {
+      "label": "Term",
+      "text": "crimson",
+      "background": "ghostWhite",
+      "size_px": 22,
+      "bold": true,
+      "ratio": 4.72,
+      "required": 3.0,
+      "pass": true
+    },
+    {
+      "label": "Prompt",
+      "text": "black",
+      "background": "ghostWhite",
+      "size_px": 13,
+      "bold": false,
+      "ratio": 19.86,
+      "required": 4.5,
+      "pass": true
+    },
+    {
+      "label": "Correction",
+      "text": "darkGreen",
+      "background": "ghostWhite",
+      "size_px": 12,
+      "bold": false,
+      "ratio": 7.04,
+      "required": 4.5,
+      "pass": true
+    },
+    {
+      "label": "Instructions",
+      "text": "black",
+      "background": "ghostWhite",
+      "size_px": 14,
+      "bold": false,
+      "ratio": 19.86,
+      "required": 4.5,
+      "pass": true
+    },
+    {
+      "label": "Session timer",
+      "text": "black",
+      "background": "ghostWhite",
+      "size_px": 14,
+      "bold": true,
+      "ratio": 19.86,
+      "required": 4.5,
+      "pass": true
+    },
+    {
+      "label": "Report text",
+      "text": "black",
+      "background": "white",
+      "size_px": 16,
+      "bold": false,
+      "ratio": 21.0,
+      "required": 4.5,
+      "pass": true
+    }
+  ],
+  "overflow": {
+    "prompt": {
+      "size_px": 13,
+      "total": 23,
+      "wider_than_canvas": 4,
+      "widest": [
+        {
+          "width": 448.0,
+          "tier": 3,
+          "term": "return"
+        },
+        {
+          "width": 438.8,
+          "tier": 2,
+          "term": "while-loop"
+        },
+        {
+          "width": 435.8,
+          "tier": 2,
+          "term": "if-elif-else"
+        },
+        {
+          "width": 409.8,
+          "tier": 2,
+          "term": "conditional"
+        },
+        {
+          "width": 380.2,
+          "tier": 3,
+          "term": "parameters"
+        },
+        {
+          "width": 373.6,
+          "tier": 1,
+          "term": "syntax"
+        }
+      ]
+    },
+    "correction": {
+      "size_px": 12,
+      "total": 23,
+      "wider_than_canvas": 0,
+      "widest": [
+        {
+          "width": 372.8,
+          "tier": 3,
+          "term": "parameters"
+        },
+        {
+          "width": 372.1,
+          "tier": 2,
+          "term": "conditional"
+        },
+        {
+          "width": 369.5,
+          "tier": 1,
+          "term": "pseudocode"
+        },
+        {
+          "width": 364.8,
+          "tier": 2,
+          "term": "condition"
+        },
+        {
+          "width": 361.4,
+          "tier": 1,
+          "term": "variable"
+        },
+        {
+          "width": 358.3,
+          "tier": 2,
+          "term": "event"
+        }
+      ]
+    }
+  }
+}

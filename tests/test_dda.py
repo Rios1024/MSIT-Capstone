@@ -1,234 +1,245 @@
 """Unit tests for the Dynamic CS Vocabulary Engine (main.py).
 
-Black-box tests call the pure functions with inputs and check only outputs.
-White-box tests drive the event handlers and inspect the engine's state.
+Black-box tests call the pure functions and compare outputs with the stated
+rules. White-box tests drive onKeyPress() and onStep() and inspect state.
 """
 import pytest
 
-FLAME = "\U0001F525"
+from stubs import answer, wait, wrong_key
 
 
-# ------------------------------------------------------------------ helpers
-def wait(engine, seconds):
-    """Advance the sandbox clock by calling onStep() ten times a second."""
-    for _ in range(int(seconds * engine.app.stepsPerSecond)):
-        engine.onStep()
+# =============================================================================
+# Black-box tests: pure functions
+# =============================================================================
+
+@pytest.mark.parametrize("tier, streak, missStreak, seconds, errors, expected", [
+    (1, 1, 0, 4.9, 0, (2, "flow")),        # just under the 5 s flow boundary
+    (1, 1, 0, 5.0, 0, (1, "steady")),      # exactly 5 s is not flow
+    (2, 1, 0, 15.0, 0, (2, "steady")),     # exactly 15 s is not overload
+    (2, 1, 0, 15.1, 0, (1, "overload")),   # just over the 15 s boundary
+    (2, 0, 1, 3.0, 1, (2, "steady")),      # one miss holds the tier
+    (2, 0, 2, 3.0, 1, (1, "overload")),    # two first-try misses in a row
+    (2, 0, 1, 3.0, 2, (1, "overload")),    # two wrong presses on one question
+    (1, 3, 0, 8.0, 0, (2, "streak")),      # third consecutive first-try answer
+    (1, 4, 0, 8.0, 0, (1, "steady")),      # fourth does not promote again
+    (1, 6, 0, 8.0, 0, (2, "streak")),      # sixth promotes again
+    (2, 3, 0, 20.0, 0, (1, "overload")),   # overload outranks a streak
+    (3, 3, 0, 2.0, 0, (3, "streak")),      # promotion is capped at Tier 3
+    (1, 0, 2, 20.0, 2, (1, "overload")),   # demotion is floored at Tier 1
+])
+def test_next_difficulty_rules(game, tier, streak, missStreak, seconds, errors, expected):
+    assert game.nextDifficulty(tier, streak, missStreak, seconds, errors) == expected
 
 
-def wrong_key(engine):
-    return "n" if engine.app.correctKey == "y" else "y"
+@pytest.mark.parametrize("streak, missStreak, errors, expected", [
+    (0, 0, 0, (1, 0)),
+    (2, 1, 0, (3, 0)),
+    (4, 0, 1, (0, 1)),
+    (0, 1, 2, (0, 2)),
+])
+def test_update_streaks(game, streak, missStreak, errors, expected):
+    assert game.updateStreaks(streak, missStreak, errors) == expected
 
 
-def answer(engine, seconds=8, first_try=True):
-    """Answer the current question, optionally after one wrong key press."""
-    wait(engine, seconds)
-    if not first_try:
-        engine.onKeyPress(wrong_key(engine))
-    engine.onKeyPress(engine.app.correctKey)
+@pytest.mark.parametrize("correct, total, percent", [
+    (0, 0, 0),
+    (2, 3, 66),
+    (5, 5, 100),
+    (0, 4, 0),
+])
+def test_calc_accuracy(game, correct, total, percent):
+    assert game.calcAccuracy(correct, total) == percent
 
 
-def start_at_tier(engine, tier):
-    engine.app.difficulty = tier
-    engine.loadScenario()
+@pytest.mark.parametrize("ticks, seconds", [
+    (0, 180),
+    (9, 180),
+    (10, 179),
+    (1799, 1),
+    (1800, 0),
+    (5000, 0),
+])
+def test_seconds_remaining(game, ticks, seconds):
+    assert game.secondsRemaining(ticks, 10) == seconds
 
 
-# =========================================================== BLACK-BOX TESTS
-@pytest.mark.parametrize(
-    "tier, streak, misses, seconds, errors, expected",
-    [
-        (1, 1, 0, 4.9, 0, (2, "flow")),       # just under the 5 s flow limit
-        (1, 1, 0, 5.0, 0, (1, "steady")),     # boundary: exactly 5 s holds
-        (2, 1, 0, 15.0, 0, (2, "steady")),    # boundary: exactly 15 s holds
-        (2, 1, 0, 15.1, 0, (1, "overload")),  # just over the 15 s limit
-        (2, 0, 1, 3.0, 1, (2, "steady")),     # one corrected miss holds
-        (2, 0, 2, 3.0, 1, (1, "overload")),   # second miss in a row demotes
-        (2, 0, 1, 3.0, 2, (1, "overload")),   # two wrong presses demote
-        (1, 3, 0, 8.0, 0, (2, "streak")),     # third first-try answer promotes
-        (1, 4, 0, 8.0, 0, (1, "steady")),     # fourth does not promote again
-        (1, 6, 0, 8.0, 0, (2, "streak")),     # every third answer promotes
-        (2, 3, 0, 20.0, 0, (1, "overload")),  # a slow streak never promotes
-        (3, 3, 0, 2.0, 0, (3, "streak")),     # capped at the top tier
-        (1, 0, 2, 20.0, 2, (1, "overload")),  # floored at the bottom tier
-    ],
-)
-def test_next_difficulty_rules(engine, tier, streak, misses, seconds, errors, expected):
-    assert engine.nextDifficulty(tier, streak, misses, seconds, errors) == expected
-
-
-@pytest.mark.parametrize(
-    "streak, misses, errors, expected",
-    [
-        (0, 0, 0, (1, 0)),  # first-try answer starts a streak
-        (2, 1, 0, (3, 0)),  # first-try answer clears the miss count
-        (4, 0, 1, (0, 1)),  # corrected answer breaks the streak
-        (0, 1, 2, (0, 2)),  # misses accumulate
-    ],
-)
-def test_update_streaks(engine, streak, misses, errors, expected):
-    assert engine.updateStreaks(streak, misses, errors) == expected
-
-
-@pytest.mark.parametrize(
-    "first_try, total, expected",
-    [(0, 0, 0), (2, 3, 66), (5, 5, 100), (0, 4, 0)],
-)
-def test_calc_accuracy(engine, first_try, total, expected):
-    assert engine.calcAccuracy(first_try, total) == expected
-
-
-@pytest.mark.parametrize(
-    "ticks, expected",
-    [(0, 180), (9, 180), (10, 179), (1799, 1), (1800, 0), (5000, 0)],
-)
-def test_seconds_remaining(engine, ticks, expected):
-    assert engine.secondsRemaining(ticks, 10) == expected
-
-
-def test_pick_puzzle_never_repeats_last_term(engine):
-    pool = [{"term": "a"}, {"term": "b"}, {"term": "c"}]
+def test_pick_puzzle_never_repeats_last_term(game):
+    pool = game.app.curriculum[2]
     last = None
-    for _ in range(200):
-        puzzle = engine.pickPuzzle(pool, last)
+    for _ in range(2000):
+        puzzle = game.pickPuzzle(pool, last)
         assert puzzle["term"] != last
         last = puzzle["term"]
 
 
-def test_pick_puzzle_single_item_pool(engine):
-    only = {"term": "solo"}
-    assert engine.pickPuzzle([only], "solo") is only
+def test_pick_puzzle_single_item_pool(game):
+    pool = [{"term": "only"}]
+    assert game.pickPuzzle(pool, "only") == {"term": "only"}
 
 
-def test_streak_text_flame_is_valid_unicode(engine):
-    assert engine.streakText(2) == "Streak: 2"
-    assert engine.streakText(3) == f"Streak: 3 {FLAME}"
-    engine.streakText(3).encode("utf-8")  # raised UnicodeEncodeError before the fix
+def test_streak_text_flame_is_valid_unicode(game):
+    assert game.streakText(2) == "Streak: 2"
+    text = game.streakText(3)
+    assert text.endswith("\U0001F525")
+    text.encode("utf-8")    # a lone surrogate would raise here
 
 
-def test_curriculum_is_well_formed(engine):
-    terms = []
-    for tier in (1, 2, 3):
-        pool = engine.app.curriculum[tier]
-        assert len(pool) >= 2          # needed to avoid back-to-back repeats
-        assert tier in engine.app.topics
+def test_curriculum_is_well_formed(game):
+    assert sorted(game.app.curriculum) == [1, 2, 3]
+    for tier, pool in game.app.curriculum.items():
+        assert len(pool) >= 2, "each tier needs two terms to avoid repeats"
+        assert tier in game.app.topics
+        terms = [p["term"] for p in pool]
+        assert len(terms) == len(set(terms))
         for puzzle in pool:
-            assert set(puzzle) == {"term", "prompt", "ans", "correction"}
             assert puzzle["ans"] in ("y", "n")
-            terms.append(puzzle["term"])
-    assert len(terms) == len(set(terms))  # no duplicate terms
+            assert puzzle["prompt"].endswith("?")
+            expected_word = "True." if puzzle["ans"] == "y" else "False."
+            assert puzzle["correction"].startswith(expected_word)
 
 
-# =========================================================== WHITE-BOX TESTS
-def test_first_scenario_is_loaded(engine):
-    assert engine.app.difficulty == 1
-    assert engine.app.correctKey in ("y", "n")
-    assert engine.tierLabel.value == "Tier: 1"
-    assert engine.globalTimerLabel.value == "Session Time Left: 180s"
+# =============================================================================
+# White-box tests: event handlers and internal state
+# =============================================================================
+
+def test_first_scenario_is_loaded(game):
+    app = game.app
+    assert app.difficulty == 1
+    assert app.correctKey in ("y", "n")
+    assert game.tierLabel.value == "Tier: 1"
+    assert game.topicLabel.value == "Tier 1: Basics"
+    assert game.termLabel.value == f"Term: {app.lastTerm}"
+    assert game.globalTimerLabel.value == "Session Time Left: 180s"
+    assert app.reportUI.visible is False
 
 
-def test_other_keys_are_ignored(engine):
-    term = engine.termLabel.value
-    for key in ("space", "a", "enter", "1"):
-        engine.onKeyPress(key)
-    assert engine.app.errors == 0
-    assert engine.app.totalQuestions == 0
-    assert engine.termLabel.value == term
+def test_other_keys_are_ignored(game):
+    app = game.app
+    before = (app.totalQuestions, app.errors, game.termLabel.value)
+    for key in ["a", "space", "enter", "Y", "N", "1"]:
+        game.onKeyPress(key)
+    assert (app.totalQuestions, app.errors, game.termLabel.value) == before
 
 
-def test_wrong_key_shows_correction_and_breaks_streak(engine):
-    engine.app.currentStreak = 2
-    engine.onKeyPress(wrong_key(engine))
-    assert engine.app.errors == 1
-    assert engine.app.currentStreak == 0
-    assert engine.errorLabel.value == "Errors: 1"
-    assert engine.feedbackLabel.value == engine.app.currentCorrection
-    assert engine.app.totalQuestions == 0  # the question is still open
+def test_wrong_key_shows_correction_and_breaks_streak(game):
+    app = game.app
+    answer(game, 8)
+    answer(game, 8)
+    assert app.currentStreak == 2
+    game.onKeyPress(wrong_key(game))
+    assert app.errors == 1
+    assert app.currentStreak == 0
+    assert game.errorLabel.value == "Errors: 1"
+    assert game.streakLabel.value == "Streak: 0"
+    assert game.feedbackLabel.value == app.currentCorrection
+    assert app.totalQuestions == 2    # the question is still open
 
 
-def test_first_try_answer_updates_accuracy_counters(engine):
-    answer(engine, seconds=8)
-    answer(engine, seconds=8, first_try=False)
-    assert engine.app.totalQuestions == 2
-    assert engine.app.firstTryCorrect == 1
+def test_first_try_answer_updates_accuracy_counters(game):
+    app = game.app
+    answer(game, 8)
+    answer(game, 8, wrong_first=1)
+    assert app.totalQuestions == 2
+    assert app.firstTryCorrect == 1
+    assert app.missStreak == 1
 
 
-def test_three_streak_promotes_and_shows_flame(engine):
+def test_three_streak_promotes_and_shows_flame(game):
+    app = game.app
     for _ in range(3):
-        answer(engine, seconds=8)
-    assert engine.app.difficulty == 2
-    assert engine.app.lastReason == "streak"
-    assert engine.streakLabel.value == f"Streak: 3 {FLAME}"
+        answer(game, 8)
+    assert app.difficulty == 2
+    assert app.lastReason == "streak"
+    assert app.currentStreak == 3
+    assert game.streakLabel.value == "Streak: 3 \U0001F525"
+    assert game.tierLabel.value == "Tier: 2"
 
 
-def test_fast_first_try_answer_promotes(engine):
-    answer(engine, seconds=2)
-    assert engine.app.difficulty == 2
-    assert engine.app.lastReason == "flow"
+def test_fast_first_try_answer_promotes(game):
+    app = game.app
+    answer(game, 2)
+    assert app.difficulty == 2
+    assert app.lastReason == "flow"
 
 
-def test_two_first_try_misses_in_a_row_demote(engine):
-    start_at_tier(engine, 3)
-    answer(engine, seconds=2, first_try=False)
-    assert engine.app.difficulty == 3
-    answer(engine, seconds=2, first_try=False)
-    assert engine.app.difficulty == 2
-    assert engine.app.missStreak == 0  # fresh start at the easier tier
+def test_two_first_try_misses_in_a_row_demote(game):
+    app = game.app
+    app.difficulty = 3
+    answer(game, 8, wrong_first=1)
+    assert app.difficulty == 3
+    answer(game, 8, wrong_first=1)
+    assert app.difficulty == 2
+    assert app.lastReason == "overload"
+    assert (app.currentStreak, app.missStreak) == (0, 0)
 
 
-def test_student_who_always_misses_falls_to_tier_one(engine):
-    start_at_tier(engine, 3)
+def test_student_who_always_misses_falls_to_tier_one(game):
+    app = game.app
+    app.difficulty = 3
+    tiers = []
     for _ in range(12):
-        answer(engine, seconds=2, first_try=False)
-    assert engine.app.difficulty == 1
-    assert engine.app.firstTryCorrect == 0
+        answer(game, 8, wrong_first=1)
+        tiers.append(app.difficulty)
+    assert tiers[:4] == [3, 2, 2, 1]
+    assert set(tiers[4:]) == {1}
 
 
-def test_slow_correct_answers_never_promote(engine):
+def test_slow_correct_answers_never_promote(game):
+    app = game.app
+    app.difficulty = 2
+    tiers = []
+    for _ in range(6):
+        answer(game, 20)
+        tiers.append(app.difficulty)
+    assert tiers == [1, 1, 1, 1, 1, 1]
+
+
+def test_no_term_is_shown_twice_in_a_row(game):
+    previous = game.termLabel.value
+    for _ in range(200):
+        answer(game, 0.5)    # stays well inside the session
+        game.app.globalTimeTicks = 0
+        assert game.termLabel.value != previous
+        previous = game.termLabel.value
+
+
+def test_highest_tier_survives_a_demotion(game):
+    app = game.app
     for _ in range(3):
-        answer(engine, seconds=20)
-    assert engine.app.difficulty == 1
-    assert engine.app.currentStreak == 0
+        answer(game, 8)
+    assert app.highestTier == 2
+    answer(game, 20)
+    assert app.difficulty == 1
+    assert app.highestTier == 2
 
 
-def test_no_term_is_shown_twice_in_a_row(engine):
-    start_at_tier(engine, 2)
-    previous = engine.termLabel.value
-    for _ in range(60):
-        engine.app.difficulty = 2
-        engine.loadScenario()
-        assert engine.termLabel.value != previous
-        previous = engine.termLabel.value
+def test_session_ends_after_three_minutes(game):
+    app = game.app
+    wait(game, 179.9)
+    assert app.isGameOver is False
+    assert game.globalTimerLabel.value == "Session Time Left: 1s"
+    wait(game, 0.1)
+    assert app.isGameOver is True
+    assert game.globalTimerLabel.value == "Session Time Left: 0s"
+    assert app.reportUI.visible is True
+    assert app.gameUI.visible is False
 
 
-def test_highest_tier_survives_a_demotion(engine):
-    answer(engine, seconds=2)   # 1 -> 2 (flow)
-    answer(engine, seconds=20)  # 2 -> 1 (overload)
-    assert engine.app.difficulty == 1
-    assert engine.app.highestTier == 2
+def test_input_and_clock_stop_after_game_over(game):
+    app = game.app
+    wait(game, 180)
+    ticks, total = app.globalTimeTicks, app.totalQuestions
+    game.onStep()
+    game.onKeyPress(app.correctKey)
+    assert (app.globalTimeTicks, app.totalQuestions) == (ticks, total)
 
 
-def test_session_ends_after_three_minutes(engine):
-    wait(engine, 179.9)
-    assert engine.app.isGameOver is False
-    engine.onStep()
-    assert engine.app.isGameOver is True
-    assert engine.app.reportUI.visible is True
-    assert engine.app.gameUI.visible is False
-
-
-def test_input_and_clock_stop_after_game_over(engine):
-    wait(engine, 180)
-    ticks = engine.app.globalTimeTicks
-    engine.onKeyPress(engine.app.correctKey)
-    engine.onStep()
-    assert engine.app.totalQuestions == 0
-    assert engine.app.globalTimeTicks == ticks
-
-
-def test_report_shows_session_statistics(engine):
-    answer(engine, seconds=8)
-    answer(engine, seconds=8)
-    answer(engine, seconds=8, first_try=False)
-    wait(engine, 180)
-    assert engine.app.reportTotal.value == "Questions Answered: 3"
-    assert engine.app.reportAcc.value == "First-Try Accuracy: 66%"
-    assert engine.app.reportPeak.value == "Highest Tier Reached: 1"
+def test_report_shows_session_statistics(game):
+    app = game.app
+    answer(game, 8)
+    answer(game, 8, wrong_first=1)
+    answer(game, 8)
+    wait(game, 180)
+    assert app.reportTotal.value == "Questions Answered: 3"
+    assert app.reportAcc.value == "First-Try Accuracy: 66%"
+    assert app.reportPeak.value == "Highest Tier Reached: 1"

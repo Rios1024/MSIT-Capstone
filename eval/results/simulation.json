@@ -1,0 +1,168 @@
+{
+  "model": {
+    "p_first_try": {
+      "within": 0.9,
+      "out": 0.5
+    },
+    "seconds_triangular": {
+      "within": [
+        3.0,
+        12.0,
+        6.0
+      ],
+      "out": [
+        6.0,
+        20.0,
+        11.0
+      ]
+    },
+    "correction_seconds": 2.0,
+    "sessions": 1000
+  },
+  "scripted": {
+    "Twelve first-try misses at 8 s, start Tier 3": {
+      "v0.2.0": [
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3
+      ],
+      "current": [
+        3,
+        2,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    "Six correct answers at 20 s, start Tier 2": {
+      "v0.2.0": [
+        1,
+        1,
+        2,
+        1,
+        1,
+        2
+      ],
+      "current": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    "Nine first-try answers at 8 s, start Tier 1": {
+      "v0.2.0": [
+        1,
+        1,
+        2,
+        2,
+        2,
+        3,
+        3,
+        3,
+        3
+      ],
+      "current": [
+        1,
+        1,
+        2,
+        2,
+        2,
+        3,
+        3,
+        3,
+        3
+      ]
+    },
+    "Back-to-back repeats in 2,000 Tier 2 draws": {
+      "v0.2.0": 324,
+      "current": 0
+    }
+  },
+  "learners": {
+    "1": {
+      "v0.2.0": {
+        "sessions": 1000,
+        "questions": 16805,
+        "on_target_pct": 47.6,
+        "too_hard_pct": 52.4,
+        "too_easy_pct": 0.0,
+        "mean_questions": 16.8,
+        "mean_tier_changes": 5.57,
+        "last_question_on_target_pct": 31.4
+      },
+      "current": {
+        "sessions": 1000,
+        "questions": 17612,
+        "on_target_pct": 55.0,
+        "too_hard_pct": 45.0,
+        "too_easy_pct": 0.0,
+        "mean_questions": 17.6,
+        "mean_tier_changes": 6.27,
+        "last_question_on_target_pct": 40.0
+      }
+    },
+    "2": {
+      "v0.2.0": {
+        "sessions": 1000,
+        "questions": 18029,
+        "on_target_pct": 41.9,
+        "too_hard_pct": 41.3,
+        "too_easy_pct": 16.9,
+        "mean_questions": 18.0,
+        "mean_tier_changes": 5.73,
+        "last_question_on_target_pct": 37.5
+      },
+      "current": {
+        "sessions": 1000,
+        "questions": 18757,
+        "on_target_pct": 47.5,
+        "too_hard_pct": 34.9,
+        "too_easy_pct": 17.6,
+        "mean_questions": 18.8,
+        "mean_tier_changes": 6.32,
+        "last_question_on_target_pct": 47.9
+      }
+    },
+    "3": {
+      "v0.2.0": {
+        "sessions": 1000,
+        "questions": 24542,
+        "on_target_pct": 75.7,
+        "too_hard_pct": 0.0,
+        "too_easy_pct": 24.3,
+        "mean_questions": 24.5,
+        "mean_tier_changes": 2.0,
+        "last_question_on_target_pct": 100.0
+      },
+      "current": {
+        "sessions": 1000,
+        "questions": 24542,
+        "on_target_pct": 73.7,
+        "too_hard_pct": 0.0,
+        "too_easy_pct": 26.3,
+        "mean_questions": 24.5,
+        "mean_tier_changes": 2.35,
+        "last_question_on_target_pct": 98.4
+      }
+    }
+  }
+}

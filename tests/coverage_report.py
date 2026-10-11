@@ -1,38 +1,36 @@
-"""Line-coverage evidence for main.py using only Python's standard library.
+"""Line coverage of main.py under the PyTest suite, using only the standard
+library `trace` module (no extra install on a school machine).
 
-Run from the repository root:  python tests/coverage_report.py
-(With pytest-cov installed, `pytest --cov=. --cov-report=term-missing` also works.)
+Usage:  python tests/coverage_report.py
 """
-import pathlib
+import os
+import sys
 import trace
-import types
 
 import pytest
 
-MAIN = str(pathlib.Path(__file__).resolve().parent.parent / "main.py")
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+MAIN = os.path.join(ROOT, "main.py")
 
 
-def executable_lines(code, found):
-    """Every source line that compiles to bytecode, including nested functions."""
-    found.update(line for (_, _, line) in code.co_lines() if line)
-    for const in code.co_consts:
-        if isinstance(const, types.CodeType):
-            executable_lines(const, found)
-    return found
-
-
-if __name__ == "__main__":
+def main():
     tracer = trace.Trace(count=1, trace=0)
-    tracer.runfunc(pytest.main, ["-q", "-p", "no:cacheprovider"])
-    executed = {line for (name, line) in tracer.results().counts if name == MAIN}
+    exit_code = tracer.runfunc(pytest.main, ["-q", "--no-header", os.path.join(ROOT, "tests")])
+    counts = tracer.results().counts
 
-    source = pathlib.Path(MAIN).read_text(encoding="utf-8")
-    expected = executable_lines(compile(source, MAIN, "exec"), set())
-    missed = sorted(expected - executed)
+    executable = {line for line in trace._find_executable_linenos(MAIN) if line}
+    executed = {line for (filename, line), hits in counts.items()
+                if os.path.abspath(filename) == MAIN and hits > 0}
+    missed = sorted(executable - executed)
 
     print()
     print("main.py line coverage (Python trace module)")
-    print(f"  executable lines : {len(expected)}")
-    print(f"  executed by tests: {len(expected) - len(missed)}")
-    print(f"  missed lines     : {missed if missed else 'none'}")
-    print(f"  coverage         : {100 * (len(expected) - len(missed)) / len(expected):.1f}%")
+    print(f"  executable lines: {len(executable)}")
+    print(f"  executed by tests: {len(executable & executed)}")
+    print(f"  missed lines: {missed if missed else 'none'}")
+    print(f"  coverage         : {100.0 * len(executable & executed) / len(executable):.1f}%")
+    return exit_code
+
+
+if __name__ == "__main__":
+    sys.exit(main())
