@@ -2,6 +2,8 @@
 
 | File | Contents |
 |---|---|
+| `index.html`, `assets/`, `report/` | Project portfolio page, published with GitHub Pages at https://rios1024.github.io/MSIT-Capstone/ |
+| `.nojekyll` | Tells GitHub Pages to serve the files as they are |
 | `design/architecture.svg`, `design/architecture.png` | System architecture: interface, application logic, and data layers of `main.py` |
 | `design/workflow.svg`, `design/workflow.png` | Development and release workflow: Gemini draft, Antigravity, pytest, GitHub, CS Academy sandbox |
 | `test_plan.md` | Test objectives, scope, levels, procedure, the 17 system test cases and the results for v0.4.1 |
