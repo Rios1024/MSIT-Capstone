@@ -2,6 +2,8 @@
 
 MSIT 5910 Capstone Project by Roger Rios.
 
+**Project portfolio:** https://rios1024.github.io/MSIT-Capstone/
+
 A browser-based True/False vocabulary trainer for introductory high school
 computer science. A Dynamic Difficulty Adjustment (DDA) engine moves each
 student between three tiers of terms based on answer speed and accuracy.
@@ -65,6 +67,7 @@ environment variables.
 | `eval/results/` | Result files written by the scripts above |
 | `docs/design/` | Design files: architecture and workflow diagrams |
 | `docs/test_plan.md` | Test levels, system test cases and the acceptance checklist |
+| `docs/index.html`, `docs/assets/`, `docs/report/` | Portfolio page served by GitHub Pages from the `docs` folder |
 | `docs/test_logs/` | Output of the test and evaluation runs for v0.4.1, including the failing runs |
 | `docs/maintenance_plan.md` | Maintenance types, schedule, change procedure and risks |
 | `CHANGELOG.md` | What changed in each release |
